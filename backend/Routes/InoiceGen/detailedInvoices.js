@@ -1,5 +1,6 @@
 const { processInvoicesAndEmails } = require('./customerEmail');
 const dbConnection = require('./dbConnection');
+const connectToDB = require("./db");
 const sql = require("mssql");
 
 const item = {
@@ -10,12 +11,19 @@ const item = {
 
 
 async function grabInvoiceDetails(page, pageSize) {
+  let statePool; 
     try {
-      const pool = await dbConnection.getPool();
-      const endDate = 20241231;  // Consider passing these as arguments or environment variables
+      await connectToDB().then((pool) => {
+	console.log('Connected to the database:', pool);
+	statePool = pool; 
+	}).catch((error) => {
+	    console.error('Failed to connect to the dtabase:', error);
+	});       
+  
+  const endDate = 20241231;  // Consider passing these as arguments or environment variables
       const startDate = 20240101;
     
-      const set = await getDataFor2023(pool, startDate, endDate, page, pageSize);
+      const set = await getDataFor2023(statePool, startDate, endDate, page, pageSize);
       const rows = [];
   
       for (const record of set.recordset) {

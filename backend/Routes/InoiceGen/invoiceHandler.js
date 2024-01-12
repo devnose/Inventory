@@ -1,7 +1,7 @@
 const sql = require("mssql");
 const  {createInvoiceObject}  = require("./createInvoiceObject");
 const  {createQue}  = require("./createInvoiceObject");
-
+const connectToDB = require('./db')
 const  mapValues  = require("./mapValues");
 const { fieldData } = require("./fieldData");
 const dbConnection = require('./dbConnection');
@@ -13,8 +13,14 @@ const sourcePDF = "C:\\Users\\aaront\\Desktop\\react-admin-dashboard-master\\bac
 //Invoice Que Method - takes in date. 
 
 async function getInvoiceByDate(date) {
-  const pool = await dbConnection.getPool();
-  const queResult = await findInvoiceByDate(date, pool); 
+  let statePool; 
+  await connectToDB().then((pool) => {
+console.log('Connected to the database:', pool);
+statePool = pool; 
+}).catch((error) => {
+  console.error('Failed to connect to the dtabase:', error);
+}); 
+  const queResult = await findInvoiceByDate(date, statePool); 
 
 
   if (queResult.rowsAffected && queResult.rowsAffected[0] === 0){
@@ -25,19 +31,25 @@ async function getInvoiceByDate(date) {
 } else {
 
   console.log('found invoice ID: '+date)
-  return await proccessQue(queResult.recordset, pool, sql);
+  return await proccessQue(queResult.recordset, statePool, sql);
 }
 }
 
 
 async function getInvoiceById(invoiceId) {
-  const pool = await dbConnection.getPool();
+  let statePool; 
+  await connectToDB().then((pool) => {
+console.log('Connected to the database:', pool);
+statePool = pool; 
+}).catch((error) => {
+  console.error('Failed to connect to the dtabase:', error);
+}); 
   
-    const invoiceResult = await findInvoiceById(invoiceId, pool);
+    const invoiceResult = await findInvoiceById(invoiceId, statePool);
 
     if (invoiceResult.recordset.length > 0) {
         // console.log(invoiceResult)
-      await processInvoice(invoiceResult.recordset[0], pool, sql);
+      await processInvoice(invoiceResult.recordset[0], statePool, sql);
     } else {
       console.log(`No invoice found with the given ID: ${invoiceId}`);
     }

@@ -3,11 +3,18 @@ const sql = require("mssql");
 
 
 async function DBshowConnect(orderNumber) {
+
+    let statePool; 
     try{
         console.log('Looking for Equipement...')
-        const pool = await dbConnection.getPool(); 
-        const lineData = await getShowEquipment(pool, orderNumber); 
-        const details = await findInvoiceById(pool, orderNumber)
+        await connectToDB().then((pool) => {
+            console.log('Connected to the database:', pool);
+            statePool = pool; 
+            }).catch((error) => {
+                console.error('Failed to connect to the dtabase:', error);
+            });  
+        const lineData = await getShowEquipment(statePool, orderNumber); 
+        const details = await findInvoiceById(statePool, orderNumber)
 
 
         const data = {

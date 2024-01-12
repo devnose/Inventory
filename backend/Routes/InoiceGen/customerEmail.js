@@ -1,4 +1,5 @@
 const sql = require("mssql");
+const connectToDB = require("./db");
 
 // Constants for email array indices
 const EA_EMAILADDR = 0;
@@ -22,11 +23,11 @@ const config = {
 
 
 // Connect to SQL Server
-sql.connect(config).then(() => {
-  console.log("Connected to the database.");
-}).catch(err => {
-  console.error("Error connecting:", err);
-});
+// sql.connect(config).then(() => {
+//   console.log("Connected to the database.");
+// }).catch(err => {
+//   console.error("Error connecting:", err);
+// });
 
 // Validate email address
 function isValidEmail(emailAddr) {
@@ -52,7 +53,13 @@ async function processInvoicesAndEmails(custNo, pool) {
  // Initialize the email lists for this particular customer
  let validEmails = [];
  let possibleEmails = [];
-  const request = new sql.Request();
+ let statePool; 
+
+ await connectToDB().then((pool) => {
+  statePool = pool; 
+  })
+
+  const request = new statePool.Request();
   const result = await request.input('custNo', sql.VarChar, custNo).query('SELECT * FROM ARCUSFIL_SQL WHERE cus_no = @custNo');  
   if (result.recordset.length > 0) {
     const record = result.recordset[0];

@@ -13,7 +13,7 @@ const Importing = () => {
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.get('http://localhost:8081/oe/api/invoice/generate/find', {
+      const response = await axios.get('/oe/api/invoice/generate/find', {
         params: { orderNumber: inputValue }
       });
 
